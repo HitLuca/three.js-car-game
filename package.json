@@ -1,0 +1,21 @@
+{
+  "name": "three-js-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "watch": "npx watchify src/index.js -p esmify -o bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.139.2"
+  },
+  "devDependencies": {
+    "browser-resolve": "^2.0.0",
+    "browserify": "^17.0.0",
+    "eslint": "^8.13.0",
+    "esmify": "^2.1.1",
+    "watchify": "^4.0.0"
+  }
+}
