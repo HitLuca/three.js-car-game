@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { Wheel } from "./wheel";
 
+export const minimumSpeed = 1;
+export const maximumSpeed = 1;
+
 export function Car() {
     const car = new THREE.Group();
 
