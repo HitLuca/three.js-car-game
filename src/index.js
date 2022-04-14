@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { trackRadius, arcCenterX } from "./map/track";
 import { scene, createScene, addVeichle } from "./scene";
+import { getDistance } from "./utils";
 import { Car } from "./veichles/car";
 
 let ready;
@@ -102,6 +103,8 @@ function animation(timestamp) {
 
     moveOtherVeichles(timeDelta);
 
+    hitDetection();
+
     renderer.render(scene, camera);
     lastTimestamp = timestamp;
 }
@@ -125,6 +128,81 @@ function moveOtherVeichles(timeDelta) {
 }
 
 
+function hitDetection() {
+    const playerHitZone1 = getHitZonePosition(
+        playerCar.position,
+        playerAngleInitial + playerAngleMoved,
+        true,
+        15
+    );
+
+    const playerHitZone2 = getHitZonePosition(
+        playerCar.position,
+        playerAngleInitial + playerAngleMoved,
+        true,
+        -15
+    );
+
+    const hit = otherVeichles.some((veichle) => {
+        const hitDistance = 40;
+
+        if (veichle.type == "car") {
+            const veichleHitZone1 = getHitZonePosition(
+                veichle.mesh.position,
+                veichle.angle,
+                veichle.clockwise,
+                15
+            );
+            const veichleHitZone2 = getHitZonePosition(
+                veichle.mesh.position,
+                veichle.angle,
+                veichle.clockwise,
+                -15
+            );
+
+            if (getDistance(playerHitZone1, veichleHitZone1) < hitDistance) return true;
+            if (getDistance(playerHitZone1, veichleHitZone2) < hitDistance) return true;
+            if (getDistance(playerHitZone2, veichleHitZone1) < hitDistance) return true;
+        } else if (veichle.type == "truck") {
+            const veichleHitZone1 = getHitZonePosition(
+                veichle.mesh.position,
+                veichle.angle,
+                veichle.clockwise,
+                36
+            );
+            const veichleHitZone2 = getHitZonePosition(
+                veichle.mesh.position,
+                veichle.angle,
+                veichle.clockwise,
+                2
+            );
+
+            const veichleHitZone3 = getHitZonePosition(
+                veichle.mesh.position,
+                veichle.angle,
+                veichle.clockwise,
+                -34
+            );
+
+            if (getDistance(playerHitZone1, veichleHitZone1) < hitDistance) return true;
+            if (getDistance(playerHitZone1, veichleHitZone2) < hitDistance) return true;
+            if (getDistance(playerHitZone1, veichleHitZone3) < hitDistance) return true;
+            if (getDistance(playerHitZone2, veichleHitZone1) < hitDistance) return true;
+        }
+    });
+
+    if (hit) {
+        renderer.setAnimationLoop(null);
+    }
+}
+
+function getHitZonePosition(center, angle, clockwise, distance) {
+    const directionAngle = angle + clockwise ? -Math.PI / 2 : Math.PI / 2;
+    return {
+        x: center.x + Math.cos(directionAngle) * distance,
+        y: center.y + Math.sin(directionAngle) * distance
+    };
+}
 
 function movePlayerCar(timeDelta) {
     const playerSpeed = getPlayerSpeed();

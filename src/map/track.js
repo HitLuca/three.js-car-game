@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { getDistance } from "../utils";
 import { Tree } from "./tree";
 
 export const trackRadius = 225;
@@ -55,28 +56,32 @@ export function renderMap(mapWidth, mapHeight) {
         const trackRadiusDistance = 20;
         const treeDistance = 100;
         do {
-            let treeX = Math.floor(Math.random() * mapWidth) - mapWidth / 2;
-            let treeY = Math.floor(Math.random() * mapHeight) - mapHeight / 2;
+            const treeX = Math.floor(Math.random() * mapWidth) - mapWidth / 2;
+            const treeY = Math.floor(Math.random() * mapHeight) - mapHeight / 2;
+            const treeCoords = { x: treeX, y: treeY };
+            const leftCenterCoords = { x: -arcCenterX, y: 0 };
+            const rightCenterCoords = { x: arcCenterX, y: 0 };
+
             if (
                 (
-                    (distanceToPoint(treeX, treeY, -arcCenterX, 0) > outerTrackRadius + trackRadiusDistance)
+                    (getDistance(treeCoords, leftCenterCoords) > outerTrackRadius + trackRadiusDistance)
                     &&
-                    (distanceToPoint(treeX, treeY, arcCenterX, 0) > outerTrackRadius + trackRadiusDistance)
+                    (getDistance(treeCoords, rightCenterCoords) > outerTrackRadius + trackRadiusDistance)
                 ) ||
                 (
-                    (distanceToPoint(treeX, treeY, -arcCenterX, 0) < innerTrackRadius - trackRadiusDistance)
+                    (getDistance(treeCoords, leftCenterCoords) < innerTrackRadius - trackRadiusDistance)
                     &&
-                    (distanceToPoint(treeX, treeY, arcCenterX, 0) > outerTrackRadius + trackRadiusDistance)
+                    (getDistance(treeCoords, rightCenterCoords) > outerTrackRadius + trackRadiusDistance)
                 ) ||
                 (
-                    (distanceToPoint(treeX, treeY, arcCenterX, 0) < innerTrackRadius - trackRadiusDistance)
+                    (getDistance(treeCoords, rightCenterCoords) < innerTrackRadius - trackRadiusDistance)
                     &&
-                    (distanceToPoint(treeX, treeY, -arcCenterX, 0) > outerTrackRadius + trackRadiusDistance)
+                    (getDistance(treeCoords, leftCenterCoords) > outerTrackRadius + trackRadiusDistance)
                 )
             ) {
                 let goodSeparation = true;
                 for (let j = 0; j < trees.length; j++) {
-                    if (distanceToPoint(treeX, treeY, trees[j].position.x, trees[j].position.y) < treeDistance) {
+                    if (getDistance(treeCoords, { x: trees[j].position.x, y: trees[j].position.y }) < treeDistance) {
                         goodSeparation = false;
                     }
                 }
@@ -94,18 +99,9 @@ export function renderMap(mapWidth, mapHeight) {
     for (let i = 0; i < trees.length; i++) {
         map.add(trees[i]);
     }
-    // const trees = [
-    //     Tree()
-    // ];
-
-    // for (var tree in trees) {
-    //     map.add(tree);
-    // }
     return map;
 }
-function distanceToPoint(x1, y1, x2, y2 = 0) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
+
 function getLineMarkings(mapWidth, mapHeight) {
     const canvas = document.createElement("canvas");
     canvas.width = mapWidth;
